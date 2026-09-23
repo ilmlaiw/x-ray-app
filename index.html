@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AR X-Ray Object Overlay</title>
+    <!-- Tailwind CSS for modern HUD styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for futuristic typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- A-Frame and AR.js for Marker-based Augmented Reality -->
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/a3.0/build/aframe-ar.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            touch-action: none;
+        }
+        .font-mono-tech {
+            font-family: 'Share Tech Mono', monospace;
+        }
+        /* Custom HUD Glassmorphism */
+        .glass-hud {
+            background: rgba(3, 7, 18, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.25);
+        }
+        /* Scanline Overlay Effect */
+        .scanline-overlay {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0, 240, 255, 0.05) 50%,
+                rgba(0, 240, 255, 0.05)
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between select-none relative">
+
+    <!-- A-Frame AR Container -->
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" vr-mode-ui="enabled: false" class="absolute inset-0 z-0">
+        
+        <!-- Asset Preloads -->
+        <a-assets>
+            <a-mixin id="wire-cube" geometry="primitive: box; width: 1.2; height: 1.2; depth: 1.2" material="color: #00ffff; wireframe: true; opacity: 0.8; transparent: true;"></a-mixin>
+            <a-mixin id="core-sphere" geometry="primitive: sphere; radius: 0.45" material="color: #ff0055; wireframe: true; opacity: 0.9; transparent: true;"></a-mixin>
+            <a-mixin id="inner-gear" geometry="primitive: torus; radius: 0.7; tube: 0.04" material="color: #00ff66; wireframe: true; opacity: 0.7; transparent: true;"></a-mixin>
+        </a-assets>
+
+        <!-- Hiro Marker Target Tracked in 3D Space -->
+        <a-marker preset="hiro" id="targetMarker">
+            
+            <!-- X-Ray Internal Structural Assembly Group -->
+            <a-entity id="xrayGroup" position="0 0.6 0">
+                <!-- Outer Mechanical Casing Wireframe -->
+                <a-entity mixin="wire-cube" id="meshCube" animation="property: rotation; to: 360 360 0; dur: 12000; loop: true; easing: linear"></a-entity>
+                
+                <!-- Inner Thermal Core -->
+                <a-entity mixin="core-sphere" id="meshCore" animation="property: rotation; to: -360 0 360; dur: 8000; loop: true; easing: linear"></a-entity>
+                
+                <!-- Stabilizing Gyro Ring -->
+                <a-entity mixin="inner-gear" id="meshRing" rotation="90 0 0" animation="property: rotation; to: 90 360 360; dur: 10000; loop: true; easing: linear"></a-entity>
+                
+                <!-- Holographic Diagnostics Text Label -->
+                <a-text id="hudLabel" value="STRUCTURAL X-RAY // ACTIVE" position="-1.1 1.4 0" scale="0.45 0.45 0.45" color="#00ffff"></a-text>
+            </a-entity>
+
+        </a-marker>
+
+        <!-- Camera Entity -->
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- HUD Overlay Layers -->
+    <div class="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between p-4 md:p-6 scanline-overlay">
+        
+        <!-- Top Status Bar -->
+        <div class="pointer-events-auto flex items-center justify-between glass-hud px-4 py-3 rounded-2xl shadow-2xl">
+            <div class="flex items-center space-x-3">
+                <div id="trackingIndicator" class="w-3 h-3 rounded-full bg-amber-400 animate-ping"></div>
+                <div>
+                    <h1 class="font-mono-tech text-cyan-400 font-bold tracking-wider text-sm md:text-base">AR X-RAY OVERLAY</h1>
+                    <p class="text-[10px] text-cyan-200/60 font-mono-tech">TRACKING: <span id="trackStatus" class="text-amber-400">SEARCHING FOR MARKER</span></p>
+                </div>
+            </div>
+            <button id="helpBtn" class="p-2 rounded-xl bg-cyan-950/60 hover:bg-cyan-900 border border-cyan-700/50 text-cyan-300 font-mono-tech text-xs transition">
+                MARKER HELP
+            </button>
+        </div>
+
+        <!-- Spacer -->
+        <div class="flex-grow"></div>
+
+        <!-- Bottom Control Dashboard -->
+        <div class="pointer-events-auto flex flex-col space-y-3 glass-hud p-4 rounded-3xl shadow-2xl">
+            
+            <!-- Theme Selection Tabs -->
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="setXrayTheme('cyan')" id="theme-cyan" class="theme-btn py-2.5 px-2 rounded-xl text-xs font-mono-tech font-semibold tracking-wider transition bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+                    NEON CYAN
+                </button>
+                <button onclick="setXrayTheme('thermal')" id="theme-thermal" class="theme-btn py-2.5 px-2 rounded-xl text-xs font-mono-tech font-semibold tracking-wider transition bg-cyan-950/60 text-cyan-300 hover:bg-cyan-900/60 border border-cyan-800/40">
+                    THERMAL CORE
+                </button>
+                <button onclick="setXrayTheme('bio')" id="theme-bio" class="theme-btn py-2.5 px-2 rounded-xl text-xs font-mono-tech font-semibold tracking-wider transition bg-cyan-950/60 text-cyan-300 hover:bg-cyan-900/60 border border-cyan-800/40">
+                    BIO-SKELETAL
+                </button>
+            </div>
+
+            <!-- Sliders Row (Opacity & Density) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                <!-- Opacity Slider -->
+                <div class="flex items-center space-x-3 bg-black/40 px-3 py-2 rounded-xl border border-cyan-900/50">
+                    <span class="text-[10px] font-mono-tech text-cyan-400 w-16">OPACITY</span>
+                    <input type="range" id="opacitySlider" min="20" max="100" value="80" class="w-full accent-cyan-400 cursor-pointer h-1.5 bg-cyan-950 rounded-lg">
+                    <span id="opacityVal" class="text-[10px] font-mono-tech text-cyan-200 w-8 text-right">80%</span>
+                </div>
+                <!-- Wireframe Density Toggle -->
+                <div class="flex items-center justify-between bg-black/40 px-3 py-2 rounded-xl border border-cyan-900/50">
+                    <span class="text-[10px] font-mono-tech text-cyan-400">STRUCTURE DENSITY</span>
+                    <button id="densityToggle" onclick="toggleDensity()" class="px-3 py-1 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-700 text-xs font-mono-tech">
+                        STANDARD
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex space-x-2 pt-1">
+                <button id="snapshotBtn" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-500 hover:from-cyan-500 hover:to-teal-400 text-black font-mono-tech font-bold text-xs tracking-wider transition shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                    CAPTURE AR SNAPSHOT
+                </button>
+                <button id="resetViewBtn" onclick="resetView()" class="py-3 px-4 rounded-xl bg-cyan-950/80 hover:bg-cyan-900 text-cyan-300 font-mono-tech font-semibold text-xs tracking-wider border border-cyan-700/50 transition">
+                    RESET ORIENTATION
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Marker Helper Modal -->
+    <div id="helpModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex flex-col items-center justify-center p-4">
+        <div class="relative max-w-md w-full glass-hud p-6 rounded-3xl flex flex-col items-center space-y-4 shadow-2xl border border-cyan-500/40 text-center">
+            <h3 class="font-mono-tech text-cyan-400 text-base tracking-widest">HOW TO USE AR X-RAY</h3>
+            <p class="text-xs text-gray-300 leading-relaxed">
+                1. Pull up the standard <b class="text-cyan-300">AR.js Hiro Marker</b> on another device or print it out.<br>
+                2. Point your iPhone rear camera at the marker.<br>
+                3. The internal X-ray wireframe and mechanical core will lock onto the object in 3D space.
+            </p>
+            <div class="w-full bg-white p-4 rounded-2xl flex items-center justify-center">
+                <!-- Standard Hiro marker direct image preview -->
+                <img src="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" alt="Hiro Marker" class="w-40 h-40 object-contain">
+            </div>
+            <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank" class="text-xs text-cyan-400 underline font-mono-tech">
+                Open Full-Size Hiro Marker in New Tab
+            </a>
+            <button id="closeModal" class="w-full py-3 rounded-xl bg-cyan-500 text-black font-mono-tech font-bold text-xs tracking-wider hover:bg-cyan-400 transition">
+                GOT IT, START CAMERA
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-cyan-950/95 border border-cyan-500/50 text-cyan-300 px-4 py-2 rounded-xl font-mono-tech text-xs tracking-wider shadow-2xl transition-all duration-300 opacity-0 pointer-events-none">
+        INITIALIZED AR ENGINE
+    </div>
+
+    <script>
+        const marker = document.getElementById('targetMarker');
+        const trackStatus = document.getElementById('trackStatus');
+        const trackingIndicator = document.getElementById('trackingIndicator');
+        const opacitySlider = document.getElementById('opacitySlider');
+        const opacityVal = document.getElementById('opacityVal');
+        const helpModal = document.getElementById('helpModal');
+        const helpBtn = document.getElementById('helpBtn');
+        const closeModal = document.getElementById('closeModal');
+        const snapshotBtn = document.getElementById('snapshotBtn');
+        const toast = document.getElementById('toast');
+
+        const meshCube = document.getElementById('meshCube');
+        const meshCore = document.getElementById('meshCore');
+        const meshRing = document.getElementById('meshRing');
+        const hudLabel = document.getElementById('hudLabel');
+
+        let currentTheme = 'cyan';
+        let isDense = false;
+
+        // Marker Detection Event Listeners
+        marker.addEventListener('markerFound', () => {
+            trackStatus.innerText = "TARGET LOCKED // ACTIVE";
+            trackStatus.className = "text-emerald-400";
+            trackingIndicator.className = "w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_12px_#34d399]";
+            showToast("OBJECT TARGET DETECTED IN 3D SPACE");
+        });
+
+        marker.addEventListener('markerLost', () => {
+            trackStatus.innerText = "SEARCHING FOR MARKER";
+            trackStatus.className = "text-amber-400";
+            trackingIndicator.className = "w-3 h-3 rounded-full bg-amber-400 animate-ping";
+        });
+
+        // Theme Switching Logic
+        window.setXrayTheme = function(theme) {
+            currentTheme = theme;
+            
+            // Update Tab Buttons
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.className = "theme-btn py-2.5 px-2 rounded-xl text-xs font-mono-tech font-semibold tracking-wider transition bg-cyan-950/60 text-cyan-300 hover:bg-cyan-900/60 border border-cyan-800/40";
+            });
+            document.getElementById(`theme-${theme}`).className = "theme-btn py-2.5 px-2 rounded-xl text-xs font-mono-tech font-semibold tracking-wider transition bg-cyan-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.5)]";
+
+            const opacity = opacitySlider.value / 100;
+
+            if (theme === 'cyan') {
+                meshCube.setAttribute('material', `color: #00ffff; wireframe: true; opacity: ${opacity}; transparent: true;`);
+                meshCore.setAttribute('material', `color: #ff0055; wireframe: true; opacity: ${opacity}; transparent: true;`);
+                meshRing.setAttribute('material', `color: #00ff66; wireframe: true; opacity: ${opacity}; transparent: true;`);
+                hudLabel.setAttribute('color', '#00ffff');
+                hudLabel.setAttribute('value', 'STRUCTURAL X-RAY // CYAN');
+            } else if (theme === 'thermal') {
+                meshCube.setAttribute('material', `color: #ff3300; wireframe: true; opacity: ${opacity}; transparent: true;`);
+                meshCore.setAttribute('material', `color: #ffcc00; wireframe: true; opacity: ${opacity}; transparent: true;`);
+                meshRing.setAttribute('material', `color: #ff0055; wireframe: true; opacity: ${opacity}; transparent: true;`);
+                hudLabel.setAttribute('color', '#ff3300');
+                hudLabel.setAttribute('value', 'THERMAL SCAN // ACTIVE');
+            } else if (theme === 'bio') {
+                meshCube.setAttribute('material', `color: #00ff66; wireframe: true; opacity: ${opacity}; transparent: true;`);
+                meshCore.setAttribute('material', `color: #00ffff; wireframe: true; opacity: ${opacity}; transparent: true;`);
+                meshRing.setAttribute('material', `color: #99ff00; wireframe: true; opacity: ${opacity}; transparent: true;`);
+                hudLabel.setAttribute('color', '#00ff66');
+                hudLabel.setAttribute('value', 'BIO-SKELETAL // MAPPED');
+            }
+            showToast(`APPLIED THEME: ${theme.toUpperCase()}`);
+        };
+
+        // Opacity Slider adjustment
+        opacitySlider.addEventListener('input', (e) => {
+            const val = e.target.value;
+            opacityVal.innerText = `${val}%`;
+            const opacity = val / 100;
+            
+            // Re-apply to current materials
+            const currentCubeMat = meshCube.getAttribute('material');
+            const currentCoreMat = meshCore.getAttribute('material');
+            const currentRingMat = meshRing.getAttribute('material');
+            
+            if(currentCubeMat) {
+                meshCube.setAttribute('material', Object.assign({}, currentCubeMat, { opacity: opacity }));
+                meshCore.setAttribute('material', Object.assign({}, currentCoreMat, { opacity: opacity }));
+                meshRing.setAttribute('material', Object.assign({}, currentRingMat, { opacity: opacity }));
+            }
+        });
+
+        // Wireframe Density Toggle
+        window.toggleDensity = function() {
+            isDense = !isDense;
+            const btn = document.getElementById('densityToggle');
+            if (isDense) {
+                btn.innerText = "HIGH DENSITY";
+                btn.className = "px-3 py-1 rounded-lg bg-cyan-500 text-black border border-cyan-400 text-xs font-mono-tech font-bold";
+                meshCube.setAttribute('scale', '1.3 1.3 1.3');
+                meshCore.setAttribute('scale', '1.2 1.2 1.2');
+            } else {
+                btn.innerText = "STANDARD";
+                btn.className = "px-3 py-1 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-700 text-xs font-mono-tech";
+                meshCube.setAttribute('scale', '1 1 1');
+                meshCore.setAttribute('scale', '1 1 1');
+            }
+            showToast(`DENSITY: ${isDense ? 'HIGH' : 'STANDARD'}`);
+        };
+
+        // Reset View
+        window.resetView = function() {
+            marker.object3D.rotation.set(0, 0, 0);
+            showToast("ORIENTATION RESET");
+        };
+
+        // Snapshot capture simulation
+        snapshotBtn.addEventListener('click', () => {
+            showToast("AR SNAPSHOT SAVED TO DEVICE");
+        });
+
+        // Help Modal Controls
+        helpBtn.addEventListener('click', () => helpModal.classList.remove('hidden'));
+        closeModal.addEventListener('click', () => helpModal.classList.add('hidden'));
+
+        // Toast Notification Helper
+        function showToast(message) {
+            toast.innerText = message;
+            toast.style.opacity = '1';
+            toast.style.transform = 'translate(-50%, -10px)';
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, 0)';
+            }, 3000);
+        }
+
+        // Show modal on first load for convenience
+        window.onload = () => {
+            setTimeout(() => {
+                helpModal.classList.remove('hidden');
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
