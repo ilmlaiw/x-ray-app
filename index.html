@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Google Vision Inspector Pro - Neural Optical Feed</title>
+    <title>Google Vision Inspector Pro - Gemini Real Vision</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Google Sans', sans-serif;
@@ -27,44 +27,31 @@
         .scanner-beam {
             animation: scanline 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        /* Custom scrollbar for history panel */
-        ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(15, 23, 42, 0.6);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(51, 65, 85, 0.8);
-            border-radius: 9999px;
-        }
     </style>
 </head>
 <body class="relative w-screen h-screen flex flex-col justify-between select-none">
 
     <header class="absolute top-4 inset-x-4 z-30 flex items-center justify-between bg-slate-900/85 backdrop-blur-2xl border border-slate-800/80 px-5 py-3 rounded-3xl shadow-2xl">
         <div class="flex items-center space-x-3">
-            <div id="header-icon-bg" class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-emerald-500/30 transition-all duration-300">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
             </div>
             <div>
                 <h1 class="text-sm font-medium text-white tracking-tight flex items-center gap-2">
-                    Vision Inspector <span id="model-badge" class="text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">gemini-3.8-flash</span>
+                    Vision Inspector <span class="text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Gemini Live API</span>
                 </h1>
                 <p class="text-[11px] text-slate-400 mono">Real-Time Optical Neural Feed</p>
             </div>
         </div>
 
-        <div class="flex items-center space-x-2.5">
-            <button onclick="toggleHistoryDrawer()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-xl transition border border-slate-700 flex items-center gap-1.5 cursor-pointer">
-                <svg class="w-3.5 h-3.5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span class="hidden sm:inline">History</span>
-                <span id="history-count" class="bg-teal-500/20 text-teal-300 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+        <div class="flex items-center space-x-3">
+            <button onclick="toggleSound()" id="sound-toggle-btn" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-xl transition border border-slate-700 flex items-center gap-1.5 cursor-pointer">
+                <span id="sound-icon">🔊</span>
+                <span id="sound-text">Sound On</span>
             </button>
             <button onclick="openSettings()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded-xl transition border border-slate-700 flex items-center gap-1.5 cursor-pointer">
                 <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                <span>Settings</span>
+                <span>API Key</span>
             </button>
         </div>
     </header>
@@ -73,157 +60,70 @@
         
         <video id="webcam" autoplay playsinline muted class="absolute w-full h-full object-cover"></video>
         <canvas id="analysis-canvas" class="hidden"></canvas>
-        <canvas id="overlay-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
 
-        <!-- Reticle Lens -->
-        <div id="lens" class="absolute w-80 h-80 sm:w-96 sm:h-96 rounded-3xl border-2 border-emerald-400/90 shadow-[0_0_60px_rgba(16,185,129,0.3)] overflow-hidden cursor-grab active:cursor-grabbing z-20 bg-transparent flex flex-col justify-between p-4 transition-colors duration-300" style="left: calc(50% - 10rem); top: calc(50% - 10rem);">
+        <div id="lens" class="absolute w-80 h-80 sm:w-96 sm:h-96 rounded-3xl border-2 border-emerald-400/90 shadow-[0_0_60px_rgba(16,185,129,0.3)] overflow-hidden cursor-grab active:cursor-grabbing z-20 bg-transparent flex flex-col justify-between p-4" style="left: calc(50% - 10rem); top: calc(50% - 10rem);">
             
-            <div id="scanner-beam-el" class="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent scanner-beam pointer-events-none"></div>
+            <div class="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent scanner-beam pointer-events-none"></div>
 
-            <!-- Lens Top Info Bar -->
             <div class="flex items-center justify-between bg-slate-950/90 backdrop-blur-xl px-3.5 py-2 rounded-2xl border border-slate-800 text-[11px] mono text-emerald-400 shadow-lg relative z-10">
                 <span id="reticle-mode-title">LENS TARGET: READY</span>
-                <div class="flex items-center gap-2">
-                    <span id="latency-display" class="text-[10px] text-slate-400">0ms</span>
-                    <span id="reticle-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                </div>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
             </div>
 
-            <!-- Central Grid Alignment -->
             <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <div id="reticle-box-inner" class="w-24 h-24 border border-emerald-400/20 rounded-2xl"></div>
-                <div id="reticle-line-h" class="absolute w-full h-[1px] bg-emerald-400/10"></div>
-                <div id="reticle-line-v" class="absolute h-full w-[1px] bg-emerald-400/10"></div>
+                <div class="w-24 h-24 border border-emerald-400/20 rounded-2xl"></div>
+                <div class="absolute w-full h-[1px] bg-emerald-400/10"></div>
+                <div class="absolute h-full w-[1px] bg-emerald-400/10"></div>
             </div>
 
-            <!-- Lens Bottom Status Panel -->
-            <div id="lens-bottom-panel" class="bg-slate-950/95 backdrop-blur-2xl border border-emerald-500/30 rounded-2xl p-3.5 shadow-2xl relative z-10">
+            <div class="bg-slate-950/95 backdrop-blur-2xl border border-emerald-500/30 rounded-2xl p-3.5 shadow-2xl relative z-10">
                 <div class="flex items-center justify-between mb-1">
                     <span id="flaw-status" class="mono text-xs text-emerald-400 font-bold uppercase tracking-wider">Status: Awaiting Scan</span>
                     <span id="confidence-badge" class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono border border-emerald-500/20">Standby</span>
                 </div>
-                <p id="flaw-description" class="text-xs text-slate-300 leading-snug">Point the reticle at target and execute AI inspection.</p>
+                <p id="flaw-description" class="text-xs text-slate-300 leading-snug">Point the lens at any target and click Execute Real AI Scan.</p>
             </div>
-        </div>
-
-        <!-- Zoom Slider Sidebar Control -->
-        <div class="absolute right-6 top-1/2 -translate-y-1/2 z-30 hidden sm:flex flex-col items-center bg-slate-900/80 backdrop-blur-xl border border-slate-800 p-3 rounded-2xl shadow-2xl space-y-3">
-            <span class="text-[10px] mono text-slate-400 uppercase tracking-widest">Zoom</span>
-            <input type="range" id="zoom-slider" min="1" max="2.5" step="0.1" value="1" class="h-32 accent-emerald-400 cursor-pointer [writing-mode:vertical-lr] [direction:rtl]">
-            <span id="zoom-level-label" class="text-xs mono text-emerald-400 font-bold">1.0x</span>
         </div>
     </div>
 
-    <div class="absolute bottom-6 inset-x-0 z-30 flex flex-col items-center px-4 pointer-events-none space-y-3">
-        
-        <!-- Multi-Modal Prompt Presets Bar -->
-        <div class="pointer-events-auto flex items-center space-x-2 bg-slate-900/80 backdrop-blur-xl border border-slate-800/80 p-2 rounded-2xl shadow-xl overflow-x-auto max-w-full">
-            <span class="text-[10px] mono text-slate-400 px-2 font-medium uppercase tracking-wider hidden sm:inline">Preset:</span>
-            <button onclick="setPreset('defect')" class="preset-btn px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap">🔍 Defect Detector</button>
-            <button onclick="setPreset('ocr')" class="preset-btn px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap">📝 OCR Text Reader</button>
-            <button onclick="setPreset('color')" class="preset-btn px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap">🎨 Color Extractor</button>
-            <button onclick="setPreset('counter')" class="preset-btn px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap">🔢 Object Counter</button>
-        </div>
-
-        <!-- Main Action Bar -->
-        <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-2xl border border-slate-800 shadow-2xl px-6 py-3.5 rounded-3xl flex items-center space-x-5">
+    <div class="absolute bottom-6 inset-x-0 z-30 flex justify-center px-4 pointer-events-none">
+        <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-2xl border border-slate-800 shadow-2xl px-6 py-3.5 rounded-3xl flex items-center space-x-6">
             <div class="flex items-center space-x-2.5">
                 <div id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></div>
-                <span id="status-text" class="mono text-xs text-slate-300 font-medium">READY</span>
+                <span id="status-text" class="mono text-xs text-slate-300 font-medium">API KEY REQUIRED</span>
             </div>
             
             <div class="h-4 w-[1px] bg-slate-800"></div>
 
-            <div class="flex items-center space-x-3">
-                <button onclick="takeSnapshot()" title="Capture Snapshot with Burned HUD" class="p-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-2xl transition border border-slate-700 flex items-center justify-center cursor-pointer">
-                    <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </button>
-                <button id="auto-scan-toggle" onclick="toggleAutoScan()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-2xl transition border border-slate-700 text-xs font-medium flex items-center gap-1.5 cursor-pointer">
-                    <span id="auto-indicator" class="w-2 h-2 rounded-full bg-slate-500"></span>
-                    <span>Auto Scan</span>
-                </button>
-                <button onclick="executeGeminiScan()" class="flex items-center space-x-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl transition shadow-lg shadow-emerald-600/30 text-xs font-medium cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    <span>Execute AI Scan</span>
-                </button>
-            </div>
+            <button onclick="executeGeminiScan()" class="flex items-center space-x-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl transition shadow-lg shadow-blue-600/30 text-xs font-medium cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <span>Execute Real AI Scan</span>
+            </button>
         </div>
     </div>
 
     <div id="permission-screen" class="absolute inset-0 z-50 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center backdrop-blur-2xl">
         <div class="max-w-md bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl flex flex-col items-center">
-            <div class="w-16 h-16 bg-emerald-600/10 text-emerald-400 rounded-3xl flex items-center justify-center mb-5 text-3xl border border-emerald-500/20 shadow-inner">
+            <div class="w-16 h-16 bg-blue-600/10 text-blue-400 rounded-3xl flex items-center justify-center mb-5 text-3xl border border-blue-500/20 shadow-inner">
                 📷
             </div>
             <h2 class="text-xl font-semibold mb-2 text-white">Camera Access Required</h2>
-            <p class="text-sm text-slate-400 mb-6 leading-relaxed">Vision Inspector needs live camera access to stream targets into Gemini Vision models.</p>
-            <button id="start-btn" class="w-full py-3.5 px-6 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-2xl transition-all shadow-lg shadow-emerald-600/30 cursor-pointer">
+            <p class="text-sm text-slate-400 mb-6 leading-relaxed">Vision Inspector needs live camera access to stream targets into Gemini Vision.</p>
+            <button id="start-btn" class="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-2xl transition-all shadow-lg shadow-blue-600/30 cursor-pointer">
                 Initialize Camera Stream
             </button>
         </div>
     </div>
 
-    <!-- Settings Modal -->
     <div id="settings-modal" class="hidden absolute inset-0 z-50 bg-slate-950/80 flex flex-col items-center justify-center p-6 backdrop-blur-md">
-        <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl space-y-4">
-            <h2 class="text-lg font-semibold text-white">Inspector Settings</h2>
-            
-            <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Google AI Studio API Key</label>
-                <input type="password" id="api-key-input" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 mono">
-            </div>
-
-            <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">Gemini Model Version</label>
-                <select id="model-select" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 mono cursor-pointer">
-                    <option value="gemini-3.8-flash">gemini-3.8-flash (Recommended Fast Workhorse)</option>
-                    <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Ultra Low Traffic / Quota Safe)</option>
-                    <option value="gemini-3.1-pro">gemini-3.1-pro (Deep Multimodal Reasoning)</option>
-                    <option value="gemini-2.5-flash">gemini-2.5-flash (Mature Stable Release)</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-xs font-medium text-slate-400 mb-1">HUD Reticle Theme</label>
-                <select id="theme-select" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 mono cursor-pointer">
-                    <option value="emerald">Matrix Emerald</option>
-                    <option value="amber">Cyberpunk Amber</option>
-                    <option value="cyan">Deep Space Cyan</option>
-                    <option value="red">Thermal Red</option>
-                </select>
-            </div>
-
-            <div class="flex items-center justify-between pt-2">
-                <label class="text-xs text-slate-300 font-medium">Audio Sonics & Speech TTS</label>
-                <input type="checkbox" id="tts-toggle" checked class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
-            </div>
-
-            <div class="flex justify-end space-x-3 pt-3">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl">
+            <h2 class="text-lg font-semibold mb-2 text-white">Configure Gemini API Key</h2>
+            <p class="text-xs text-slate-400 mb-4">Enter your Google AI Studio API key to enable real optical analysis.</p>
+            <input type="password" id="api-key-input" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white mb-4 focus:outline-none focus:border-blue-500 mono">
+            <div class="flex justify-end space-x-3">
                 <button onclick="closeSettings()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-xl transition cursor-pointer">Cancel</button>
-                <button onclick="saveSettings()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs rounded-xl transition shadow cursor-pointer font-medium">Save Settings</button>
+                <button onclick="saveApiKey()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded-xl transition shadow cursor-pointer font-medium">Save Key</button>
             </div>
-        </div>
-    </div>
-
-    <!-- History & Logs Drawer Panel -->
-    <div id="history-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-slate-900/95 backdrop-blur-2xl border-l border-slate-800 p-6 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col justify-between">
-        <div>
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center space-x-2">
-                    <svg class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <h2 class="text-base font-semibold text-white">Inspection History</h2>
-                </div>
-                <button onclick="toggleHistoryDrawer()" class="p-2 text-slate-400 hover:text-white rounded-lg cursor-pointer">✕</button>
-            </div>
-            
-            <div id="history-list" class="space-y-3 overflow-y-auto max-h-[calc(100vh-180px)] pr-1">
-                <p class="text-xs text-slate-500 text-center py-10 mono">No inspection logs recorded yet.</p>
-            </div>
-        </div>
-
-        <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
-            <button onclick="clearHistory()" class="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs rounded-xl transition border border-rose-500/30 cursor-pointer">Clear Logs</button>
-            <button onclick="exportHistoryJSON()" class="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white text-xs rounded-xl transition shadow cursor-pointer font-medium">Export JSON</button>
         </div>
     </div>
 
@@ -239,131 +139,107 @@
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
         const canvas = document.getElementById('analysis-canvas');
-        const overlayCanvas = document.getElementById('overlay-canvas');
         const ctx = canvas.getContext('2d');
-        const overlayCtx = overlayCanvas.getContext('2d');
 
         let apiKey = localStorage.getItem('gemini_api_key') || '';
-        let selectedModel = localStorage.getItem('gemini_model') || 'gemini-3.8-flash';
-        let currentTheme = localStorage.getItem('hud_theme') || 'emerald';
-        let ttsEnabled = localStorage.getItem('tts_enabled') !== 'false';
-        let currentPreset = 'defect';
-        let isAutoScanning = false;
-        let autoScanInterval = null;
-        let scanHistory = JSON.parse(localStorage.getItem('scan_history') || '[]');
-        let lastBoundingBoxes = [];
+        let soundEnabled = localStorage.getItem('vision_sound_enabled') !== 'false';
 
-        // Preset Prompt Definitions
-        const presets = {
-            defect: "Analyze this image inside the optical reticle for any structural defects, surface anomalies, flaws, or irregularities. Return strict JSON with keys: status (short string), confidence (percentage string), description (concise analysis), and boundingBoxes (array of objects with {ymin, xmin, ymax, xmax} normalized 0-1000 integers).",
-            ocr: "Extract and transcribe all text visible inside this optical target region. Return strict JSON with keys: status ('Text Detected' or 'None'), confidence (percentage string), description (transcribed text and layout details), and boundingBoxes (array of {ymin, xmin, ymax, xmax}).",
-            color: "Analyze the dominant color palettes and material composition within the reticle. Return strict JSON with keys: status ('Color Analyzed'), confidence (percentage string), description (hex codes and material description), and boundingBoxes (empty array).",
-            counter: "Count and locate all distinct objects or items visible inside the optical frame. Return strict JSON with keys: status (count summary), confidence (percentage string), description (item count and breakdown), and boundingBoxes (array of {ymin, xmin, ymax, xmax})."
-        };
+        // Web Audio API Context for UI clicks
+        let audioCtx = null;
 
-        // Theme Definitions
-        const themes = {
-            emerald: { border: 'border-emerald-400/90', text: 'text-emerald-400', bgBadge: 'bg-emerald-500/20', borderBadge: 'border-emerald-500/30', shadow: 'shadow-[0_0_60px_rgba(16,185,129,0.3)]', beam: 'via-emerald-400', headerBg: 'from-emerald-600 via-teal-500 to-cyan-400', dot: 'bg-emerald-400' },
-            amber: { border: 'border-amber-400/90', text: 'text-amber-400', bgBadge: 'bg-amber-500/20', borderBadge: 'border-amber-500/30', shadow: 'shadow-[0_0_60px_rgba(245,158,11,0.3)]', beam: 'via-amber-400', headerBg: 'from-amber-600 via-orange-500 to-yellow-400', dot: 'bg-amber-400' },
-            cyan: { border: 'border-cyan-400/90', text: 'text-cyan-400', bgBadge: 'bg-cyan-500/20', borderBadge: 'border-cyan-500/30', shadow: 'shadow-[0_0_60px_rgba(6,182,212,0.3)]', beam: 'via-cyan-400', headerBg: 'from-cyan-600 via-blue-500 to-indigo-400', dot: 'bg-cyan-400' },
-            red: { border: 'border-rose-500/90', text: 'text-rose-400', bgBadge: 'bg-rose-500/20', borderBadge: 'border-rose-500/30', shadow: 'shadow-[0_0_60px_rgba(244,63,94,0.3)]', beam: 'via-rose-500', headerBg: 'from-rose-600 via-red-500 to-pink-500', dot: 'bg-rose-500' }
-        };
-
-        function applyTheme(themeKey) {
-            currentTheme = themeKey;
-            localStorage.setItem('hud_theme', themeKey);
-            const t = themes[themeKey];
-            
-            lens.className = `absolute w-80 h-80 sm:w-96 sm:h-96 rounded-3xl border-2 ${t.border} ${t.shadow} overflow-hidden cursor-grab active:cursor-grabbing z-20 bg-transparent flex flex-col justify-between p-4 transition-colors duration-300`;
-            document.getElementById('scanner-beam-el').className = `absolute inset-x-0 h-1 bg-gradient-to-r from-transparent ${t.beam} to-transparent scanner-beam pointer-events-none`;
-            document.getElementById('reticle-mode-title').className = `mono text-[11px] ${t.text}`;
-            document.getElementById('reticle-dot').className = `w-2 h-2 rounded-full ${t.dot} animate-ping`;
-            document.getElementById('reticle-box-inner').className = `w-24 h-24 border ${t.borderBadge} rounded-2xl`;
-            document.getElementById('lens-bottom-panel').className = `bg-slate-950/95 backdrop-blur-2xl border ${t.borderBadge} rounded-2xl p-3.5 shadow-2xl relative z-10`;
-            document.getElementById('flaw-status').className = `mono text-xs ${t.text} font-bold uppercase tracking-wider`;
-            document.getElementById('confidence-badge').className = `text-[10px] ${t.bgBadge} ${t.text} px-2 py-0.5 rounded font-mono border ${t.borderBadge}`;
-            document.getElementById('header-icon-bg').className = `w-10 h-10 rounded-2xl bg-gradient-to-tr ${t.headerBg} flex items-center justify-center shadow-lg`;
-        }
-
-        function updateApiStatus() {
-            document.getElementById('model-badge').textContent = selectedModel;
-            if (apiKey) {
-                statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
-                statusText.textContent = "SYSTEM READY";
-            } else {
-                statusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
-                statusText.textContent = "API KEY REQUIRED";
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-            updateHistoryUI();
-        }
-        updateApiStatus();
-        applyTheme(currentTheme);
-
-        function openSettings() {
-            document.getElementById('api-key-input').value = apiKey;
-            document.getElementById('model-select').value = selectedModel;
-            document.getElementById('theme-select').value = currentTheme;
-            document.getElementById('tts-toggle').checked = ttsEnabled;
-            document.getElementById('settings-modal').classList.remove('hidden');
         }
 
-        function closeSettings() {
-            document.getElementById('settings-modal').classList.add('hidden');
-        }
-
-        function saveSettings() {
-            apiKey = document.getElementById('api-key-input').value.trim();
-            selectedModel = document.getElementById('model-select').value;
-            currentTheme = document.getElementById('theme-select').value;
-            ttsEnabled = document.getElementById('tts-toggle').checked;
-
-            localStorage.setItem('gemini_api_key', apiKey);
-            localStorage.setItem('gemini_model', selectedModel);
-            localStorage.setItem('tts_enabled', ttsEnabled);
-
-            applyTheme(currentTheme);
-            updateApiStatus();
-            closeSettings();
-        }
-
-        function setPreset(presetKey) {
-            currentPreset = presetKey;
-            document.querySelectorAll('.preset-btn').forEach(btn => {
-                btn.className = "preset-btn px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap";
-            });
-            event.currentTarget.className = "preset-btn px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-medium transition cursor-pointer whitespace-nowrap";
-            playBeep(600, 0.05);
-        }
-
-        // Web Audio API Beeps & Speech Synthesis
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playBeep(freq = 440, duration = 0.08) {
-            if (!ttsEnabled) return;
+        function playClickSound() {
+            if (!soundEnabled) return;
             try {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
+                initAudio();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'sine';
-                osc.frequency.value = freq;
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.05);
+                
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch (e) {}
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch (e) {
+                // Audio context blocked before user gesture
+            }
         }
 
         function speakText(text) {
-            if (!ttsEnabled || !('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
+            if (!soundEnabled || !('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel(); // Stop previous utterance
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1.1;
+            utterance.rate = 1.05;
             utterance.pitch = 1.0;
             window.speechSynthesis.speak(utterance);
         }
 
+        function updateSoundUI() {
+            const icon = document.getElementById('sound-icon');
+            const label = document.getElementById('sound-text');
+            if (soundEnabled) {
+                icon.textContent = "🔊";
+                label.textContent = "Sound On";
+            } else {
+                icon.textContent = "🔇";
+                label.textContent = "Muted";
+                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            }
+        }
+        updateSoundUI();
+
+        function toggleSound() {
+            playClickSound();
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('vision_sound_enabled', soundEnabled);
+            updateSoundUI();
+        }
+
+        function updateApiStatus() {
+            if (apiKey) {
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+                statusText.textContent = "GEMINI VISION READY";
+            } else {
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
+                statusText.textContent = "API KEY REQUIRED";
+            }
+        }
+        updateApiStatus();
+
+        function openSettings() {
+            playClickSound();
+            document.getElementById('api-key-input').value = apiKey;
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            playClickSound();
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            playClickSound();
+            apiKey = document.getElementById('api-key-input').value.trim();
+            localStorage.setItem('gemini_api_key', apiKey);
+            updateApiStatus();
+            closeSettings();
+        }
+
         async function startCamera() {
+            playClickSound();
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, 
@@ -371,59 +247,20 @@
                 });
                 video.srcObject = stream;
                 permissionScreen.style.display = 'none';
-                playBeep(880, 0.15);
             } catch (err) {
                 alert("Camera permission denied or hardware unavailable.");
             }
         }
+
         startBtn.addEventListener('click', startCamera);
 
-        // Zoom Slider Control
-        const zoomSlider = document.getElementById('zoom-slider');
-        const zoomLabel = document.getElementById('zoom-level-label');
-        zoomSlider.addEventListener('input', (e) => {
-            const val = e.target.value;
-            zoomLabel.textContent = `${val}x`;
-            video.style.transform = `scale(${val})`;
-        });
-
-        // Bounding Box Overlay Renderer
-        function drawBoundingBoxes(boxes) {
-            overlayCanvas.width = window.innerWidth;
-            overlayCanvas.height = window.innerHeight;
-            overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-            
-            if (!boxes || boxes.length === 0) return;
-
-            const containerRect = document.getElementById('camera-container').getBoundingClientRect();
-            
-            overlayCtx.strokeStyle = currentTheme === 'amber' ? '#f59e0b' : currentTheme === 'cyan' ? '#06b6d4' : currentTheme === 'red' ? '#f43f5e' : '#10b981';
-            overlayCtx.lineWidth = 2;
-            overlayCtx.fillStyle = overlayCtx.strokeStyle;
-            overlayCtx.font = '11px JetBrains Mono';
-
-            boxes.forEach(box => {
-                const x = containerRect.left + (box.xmin / 1000) * containerRect.width;
-                const y = containerRect.top + (box.ymin / 1000) * containerRect.height;
-                const w = ((box.xmax - box.xmin) / 1000) * containerRect.width;
-                const h = ((box.ymax - box.ymin) / 1000) * containerRect.height;
-
-                overlayCtx.strokeRect(x, y, w, h);
-                overlayCtx.fillRect(x, y > 20 ? y - 16 : y + h, 80, 16);
-                overlayCtx.fillStyle = '#030712';
-                overlayCtx.fillText("TARGET DETECTED", x + 4, y > 20 ? y - 4 : y + h + 12);
-                overlayCtx.fillStyle = overlayCtx.strokeStyle;
-            });
-        }
-
-        // Main AI Scan Execution with Exponential Back-Off
         async function executeGeminiScan() {
+            playClickSound();
             if (!apiKey) {
                 openSettings();
                 return;
             }
 
-            playBeep(520, 0.08);
             canvas.width = video.videoWidth || 640;
             canvas.height = video.videoHeight || 480;
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -446,24 +283,23 @@
             cropCtx.drawImage(canvas, cropX, cropY, cropWidth, cropHeight, 0, 0, 512, 512);
 
             const base64Image = cropCanvas.toDataURL('image/jpeg', 0.85).split(',')[1];
-            const startTime = performance.now();
 
             let attempt = 0;
-            const maxRetries = 8;
+            const maxRetries = 10;
 
             while (attempt < maxRetries) {
                 try {
                     flawStatus.textContent = attempt === 0 ? "Status: Analyzing Frame..." : `Status: High Demand (Retrying ${attempt}/${maxRetries})...`;
-                    flawDesc.textContent = attempt === 0 ? "Querying Gemini Vision..." : `Server busy. Auto-retrying with backoff...`;
+                    flawDesc.textContent = attempt === 0 ? "Querying Gemini Vision..." : `Server busy. Auto-retrying in a few seconds...`;
                     confidenceBadge.textContent = "Processing";
 
-                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`, {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             contents: [{
                                 parts: [
-                                    { text: presets[currentPreset] },
+                                    { text: "Analyze this image captured inside an optical inspection reticle. Respond strictly in valid JSON format with three keys: status (short string like 'Nominal' or 'Defect Found'), confidence (percentage string), and description (concise technical summary of what you observe)." },
                                     { inline_data: { mime_type: "image/jpeg", data: base64Image } }
                                 ]
                             }],
@@ -479,8 +315,8 @@
                         const errMsg = data.error?.message || "API request failed";
                         if (response.status === 429 || errMsg.toLowerCase().includes('demand') || errMsg.toLowerCase().includes('quota')) {
                             attempt++;
-                            const waitTime = Math.min(Math.pow(2, attempt) + Math.random(), 20);
-                            flawDesc.textContent = `High server demand. Retrying in ${Math.round(waitTime)}s...`;
+                            const waitTime = Math.min(attempt * 3, 15);
+                            flawDesc.textContent = `High server demand. Auto-retrying in ${waitTime}s...`;
                             await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
                             continue;
                         } else {
@@ -490,33 +326,13 @@
 
                     const rawText = data.candidates[0].content.parts[0].text;
                     const result = JSON.parse(rawText);
-                    const latency = Math.round(performance.now() - startTime);
 
-                    document.getElementById('latency-display').textContent = `${latency}ms`;
                     reticleTitle.textContent = "LENS TARGET: ANALYZED";
                     flawStatus.textContent = `Status: ${result.status}`;
                     flawDesc.textContent = result.description;
                     confidenceBadge.textContent = result.confidence;
 
-                    lastBoundingBoxes = result.boundingBoxes || [];
-                    drawBoundingBoxes(lastBoundingBoxes);
-
-                    // Log inspection
-                    const logEntry = {
-                        timestamp: new Date().toLocaleTimeString(),
-                        model: selectedModel,
-                        preset: currentPreset,
-                        status: result.status,
-                        confidence: result.confidence,
-                        description: result.description,
-                        latency: `${latency}ms`
-                    };
-                    scanHistory.unshift(logEntry);
-                    if (scanHistory.length > 50) scanHistory.pop();
-                    localStorage.setItem('scan_history', JSON.stringify(scanHistory));
-                    updateHistoryUI();
-
-                    playBeep(980, 0.12);
+                    // Speak the result aloud using AI voice if sound is on
                     speakText(`${result.status}. ${result.description}`);
                     return;
 
@@ -524,9 +340,9 @@
                     if (attempt >= maxRetries) {
                         console.error(err);
                         flawStatus.textContent = "Status: API Error";
-                        flawDesc.textContent = err.message || "Failed after auto-retries.";
+                        flawDesc.textContent = err.message || "Failed after multiple retries.";
                         confidenceBadge.textContent = "Error";
-                        playBeep(220, 0.3);
+                        speakText("API error occurred during scan.");
                         return;
                     }
                     attempt++;
@@ -535,104 +351,6 @@
             }
         }
 
-        // Continuous Autonomous Scanning Toggle
-        function toggleAutoScan() {
-            isAutoScanning = !isAutoScanning;
-            const indicator = document.getElementById('auto-indicator');
-            const toggleBtn = document.getElementById('auto-scan-toggle');
-            
-            if (isAutoScanning) {
-                indicator.className = "w-2 h-2 rounded-full bg-emerald-400 animate-ping";
-                toggleBtn.classList.add('border-emerald-500', 'text-emerald-300');
-                autoScanInterval = setInterval(() => {
-                    executeGeminiScan();
-                }, 6000);
-            } else {
-                indicator.className = "w-2 h-2 rounded-full bg-slate-500";
-                toggleBtn.classList.remove('border-emerald-500', 'text-emerald-300');
-                clearInterval(autoScanInterval);
-            }
-        }
-
-        // History UI & Exporter
-        function toggleHistoryDrawer() {
-            const drawer = document.getElementById('history-drawer');
-            drawer.classList.toggle('translate-x-full');
-        }
-
-        function updateHistoryUI() {
-            document.getElementById('history-count').textContent = scanHistory.length;
-            const listEl = document.getElementById('history-list');
-            if (scanHistory.length === 0) {
-                listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-10 mono">No inspection logs recorded yet.</p>`;
-                return;
-            }
-
-            listEl.innerHTML = scanHistory.map(item => `
-                <div class="bg-slate-950 border border-slate-800 p-3.5 rounded-2xl space-y-1.5 shadow">
-                    <div class="flex items-center justify-between text-[10px] mono text-slate-400">
-                        <span>${item.timestamp} • ${item.model}</span>
-                        <span class="text-teal-400 font-bold">${item.confidence}</span>
-                    </div>
-                    <p class="text-xs font-semibold text-emerald-400">${item.status}</p>
-                    <p class="text-xs text-slate-300 leading-snug">${item.description}</p>
-                </div>
-            `).join('');
-        }
-        updateHistoryUI();
-
-        function clearHistory() {
-            scanHistory = [];
-            localStorage.removeItem('scan_history');
-            updateHistoryUI();
-        }
-
-        function exportHistoryJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(scanHistory, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `vision_inspector_logs_${Date.now()}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        // Snapshot Capture with Burned HUD Overlays
-        function takeSnapshot() {
-            playBeep(1200, 0.1);
-            const snapCanvas = document.createElement('canvas');
-            snapCanvas.width = video.videoWidth || 1280;
-            snapCanvas.height = video.videoHeight || 720;
-            const snapCtx = snapCanvas.getContext('2d');
-
-            snapCtx.drawImage(video, 0, 0, snapCanvas.width, snapCanvas.height);
-            snapCtx.drawImage(overlayCanvas, 0, 0, snapCanvas.width, snapCanvas.height);
-
-            // Burn HUD watermark header
-            snapCtx.fillStyle = 'rgba(3, 7, 18, 0.85)';
-            snapCtx.fillRect(40, 40, 450, 90);
-            snapCtx.strokeStyle = '#10b981';
-            snapCtx.lineWidth = 2;
-            snapCtx.strokeRect(40, 40, 450, 90);
-
-            snapCtx.fillStyle = '#10b981';
-            snapCtx.font = 'bold 16px Google Sans';
-            snapCtx.fillText("GOOGLE VISION INSPECTOR PRO", 65, 75);
-            snapCtx.fillStyle = '#f3f4f6';
-            snapCtx.font = '13px JetBrains Mono';
-            snapCtx.fillText(`Status: ${flawStatus.textContent}`, 65, 100);
-            snapCtx.fillText(`Timestamp: ${new Date().toLocaleString()}`, 65, 120);
-
-            const imageURI = snapCanvas.toDataURL('image/png');
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", imageURI);
-            downloadAnchor.setAttribute("download", `inspection_snapshot_${Date.now()}.png`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        // Drag & Drop Lens Reticle Handling
         let isDragging = false;
         let startX, startY;
 
