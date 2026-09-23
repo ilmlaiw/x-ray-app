@@ -19,97 +19,89 @@
         .mono {
             font-family: 'JetBrains Mono', monospace;
         }
-        /* Authentic Radiographic X-Ray Filters */
-        .xray-bone {
-            filter: grayscale(100%) invert(100%) contrast(250%) brightness(90%);
+        /* Advanced Radiographic X-Ray Shader Filter */
+        .xray-shader {
+            filter: grayscale(1) invert(1) contrast(300%) brightness(110%) hue-rotate(180deg);
         }
-        .xray-industrial {
-            filter: grayscale(100%) invert(90%) contrast(300%) sepia(80%) hue-rotate(140deg) brightness(110%);
+        .thermal-shader {
+            filter: invert(1) hue-rotate(200deg) contrast(250%) saturate(220%);
         }
-        .xray-thermal {
-            filter: invert(100%) hue-rotate(210deg) contrast(220%) saturate(200%);
+        .industrial-shader {
+            filter: grayscale(1) invert(90%) contrast(350%) sepia(90%) hue-rotate(130deg);
         }
     </style>
 </head>
 <body class="relative w-screen h-screen flex flex-col justify-between">
 
-    {/* Google-Style Top App Bar */}
-    <header class="absolute top-0 inset-x-0 z-30 px-6 py-4 flex items-center justify-between bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/80 shadow-lg">
+    <!-- Google-Style Top App Bar -->
+    <header class="absolute top-0 inset-x-0 z-30 px-6 py-4 flex items-center justify-between bg-slate-900/85 backdrop-blur-xl border-b border-slate-800/80 shadow-2xl">
         <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-md shadow-blue-500/20">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             </div>
             <div>
                 <h1 class="text-base font-medium text-white tracking-tight flex items-center gap-2">
-                    Radiographic Vision <span class="text-[10px] font-semibold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">AI v3.4</span>
+                    Radiographic Vision <span class="text-[10px] font-semibold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">Gemini AI</span>
                 </h1>
-                <p class="text-xs text-slate-400">Google Advanced Multimodal Scanner</p>
+                <p class="text-xs text-slate-400">Real-Time Optical X-Ray Spectrometer</p>
             </div>
         </div>
 
-        {/* Mode Selector Chips */}
+        <!-- Mode Selector Chips -->
         <div class="hidden sm:flex items-center space-x-2 bg-slate-800/60 p-1 rounded-full border border-slate-700/50">
-            <button onclick="setMode('bone')" id="chip-bone" class="px-4 py-1.5 text-xs font-medium rounded-full transition-all bg-blue-600 text-white shadow">Skeletal / Medical</button>
-            <button onclick="setMode('industrial')" id="chip-industrial" class="px-4 py-1.5 text-xs font-medium rounded-full transition-all text-slate-300 hover:text-white">Industrial CT</button>
-            <button onclick="setMode('thermal')" id="chip-thermal" class="px-4 py-1.5 text-xs font-medium rounded-full transition-all text-slate-300 hover:text-white">Deep Spectrum</button>
+            <button onclick="setMode('xray', this)" class="mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all bg-blue-600 text-white shadow">Medical X-Ray</button>
+            <button onclick="setMode('thermal', this)" class="mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all text-slate-300 hover:text-white">Thermal CT</button>
+            <button onclick="setMode('industrial', this)" class="mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all text-slate-300 hover:text-white">Industrial Wireframe</button>
         </div>
     </header>
 
-    {/* Camera Viewport & Draggable High-Res X-Ray Lens */}
+    <!-- Camera Viewport & Draggable Lens -->
     <div id="camera-container" class="relative w-full h-full overflow-hidden bg-slate-950 flex items-center justify-center">
         
-        {/* Background Live Camera Feed (Low Opacity for Depth) */}
-        <video id="webcam" autoplay playsinline muted class="absolute w-full h-full object-cover opacity-30"></video>
+        <!-- Base Live Camera Feed (Low Opacity Ambient View) -->
+        <video id="webcam" autoplay playsinline muted class="absolute w-full h-full object-cover opacity-25"></video>
 
-        {/* Dynamic X-Ray Image Library Overlay (Swappable high-res radiographs) */}
-        <div id="lens" class="absolute w-72 h-72 sm:w-80 sm:h-80 rounded-3xl border-2 border-blue-400/80 shadow-[0_0_50px_rgba(59,130,246,0.4)] overflow-hidden cursor-grab active:cursor-grabbing z-20 backdrop-blur-md bg-slate-900/40" style="left: calc(50% - 10rem); top: calc(50% - 10rem);">
+        <!-- Draggable Interactive X-Ray Lens Window -->
+        <div id="lens" class="absolute w-72 h-72 sm:w-80 sm:h-80 rounded-full border-2 border-cyan-400/90 shadow-[0_0_60px_rgba(6,182,212,0.5)] overflow-hidden cursor-grab active:cursor-grabbing z-20 backdrop-blur-md bg-black/40" style="left: calc(50% - 10rem); top: calc(50% - 10rem);">
             
-            {/* High-Resolution Radiograph Layer from Curated Medical/Industrial Databases */}
-            <img id="xray-asset" src="https://images.unsplash.com/photo-1530497610245-94d3c16cda28?q=80&w=1000&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover xray-bone pointer-events-none transition-all duration-300" alt="X-Ray Radiograph">
+            <!-- Live Mirrored Video inside the Lens with Real-Time X-Ray Filter -->
+            <video id="lens-video" autoplay playsinline muted class="absolute object-cover xray-shader pointer-events-none"></video>
             
-            {/* Material Density Grid & Reticle */}
-            <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px] opacity-25"></div>
+            <!-- Optical Grid & Reticle Overlay -->
+            <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(#22d3ee_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
             <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <div class="w-12 h-12 border border-blue-400/60 rounded-full animate-pulse"></div>
-                <div class="absolute w-full h-[1px] bg-blue-400/30"></div>
-                <div class="absolute h-full w-[1px] bg-blue-400/30"></div>
+                <div class="w-16 h-16 border border-cyan-400/50 rounded-full animate-pulse"></div>
+                <div class="absolute w-full h-[1px] bg-cyan-400/40"></div>
+                <div class="absolute h-full w-[1px] bg-cyan-400/40"></div>
             </div>
 
-            {/* AI Diagnostics HUD Badge */}
-            <div class="absolute bottom-3 inset-x-3 bg-slate-950/80 backdrop-blur-md border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between">
+            <!-- AI Neural Diagnostics HUD Badge -->
+            <div class="absolute bottom-4 inset-x-4 bg-slate-950/85 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-3 flex items-center justify-between shadow-xl">
                 <div>
-                    <div id="ai-label" class="mono text-[11px] text-blue-400 font-bold uppercase tracking-wider">M-Scan: Human Hand Phalanx</div>
-                    <div class="text-[10px] text-slate-400">Density: 2.84 g/cm³ • AI Confidence: 99.4%</div>
+                    <div id="ai-label" class="mono text-[11px] text-cyan-400 font-bold uppercase tracking-wider">AI Scan: Active Object Profile</div>
+                    <div id="ai-subtext" class="text-[10px] text-slate-400">Spectral Density: 2.84 g/cm³ • Locked</div>
                 </div>
-                <div class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></div>
             </div>
         </div>
     </div>
 
-    {/* Google Material Design Floating Action Bar */}
+    <!-- Google Material Design Floating Footer Status -->
     <div class="absolute bottom-6 inset-x-0 z-30 flex justify-center px-4 pointer-events-none">
-        <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-2xl border border-slate-700/80 shadow-2xl px-6 py-3 rounded-3xl flex items-center space-x-6">
-            <button onclick="cycleAsset(-1)" class="p-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white transition shadow">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
-            </button>
-            <div class="text-center">
-                <span id="asset-counter" class="mono text-xs text-blue-400 font-semibold">RADIOGRAPH 1 / 4</span>
-                <p class="text-[11px] text-slate-400">Tap arrows to switch scan subject</p>
-            </div>
-            <button onclick="cycleAsset(1)" class="p-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white transition shadow">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
-            </button>
+        <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-2xl border border-slate-700/80 shadow-2xl px-6 py-3 rounded-3xl flex items-center space-x-4">
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+            <span class="mono text-xs text-slate-300 font-medium">OPTICAL TRACKING STABLE • DRAG LENS TO SCAN ENVIRONMENT</span>
         </div>
     </div>
 
-    {/* Permission Modal */}
+    <!-- Permission Modal -->
     <div id="permission-screen" class="absolute inset-0 z-50 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center backdrop-blur-xl">
         <div class="max-w-md bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl flex flex-col items-center">
             <div class="w-16 h-16 bg-blue-600/10 text-blue-400 rounded-3xl flex items-center justify-center mb-5 text-3xl border border-blue-500/20 shadow-inner">
                 📷
             </div>
-            <h2 class="text-xl font-semibold mb-2 text-white">Enable Camera Feed</h2>
-            <p class="text-sm text-slate-400 mb-6 leading-relaxed">Radiographic Vision requires camera access to anchor optical tracking vectors for the interactive scanner.</p>
+            <h2 class="text-xl font-semibold mb-2 text-white">Camera Access Required</h2>
+            <p class="text-sm text-slate-400 mb-6 leading-relaxed">Radiographic Vision requires rear camera access to process real-time optical X-ray spectroscopy through the lens.</p>
             <button id="start-btn" class="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-2xl transition-all shadow-lg shadow-blue-600/30">
                 Initialize Optical Engine
             </button>
@@ -118,75 +110,58 @@
 
     <script>
         const video = document.getElementById('webcam');
+        const lensVideo = document.getElementById('lens-video');
         const startBtn = document.getElementById('start-btn');
         const permissionScreen = document.getElementById('permission-screen');
         const lens = document.getElementById('lens');
-        const xrayAsset = document.getElementById('xray-asset');
+        const container = document.getElementById('camera-container');
         const aiLabel = document.getElementById('ai-label');
-        const assetCounter = document.getElementById('asset-counter');
+        const aiSubtext = document.getElementById('ai-subtext');
 
-        // Curated high-res medical & industrial X-Ray radiograph library
-        const xrayLibrary = [
-            {
-                url: "https://images.unsplash.com/photo-1530497610245-94d3c16cda28?q=80&w=1000&auto=format&fit=crop",
-                title: "Human Hand Phalanx",
-                filter: "xray-bone"
-            },
-            {
-                url: "https://images.unsplash.com/photo-1579165466741-7f35e4755660?q=80&w=1000&auto=format&fit=crop",
-                title: "Thoracic Ribcage Structure",
-                filter: "xray-bone"
-            },
-            {
-                url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop",
-                title: "Microchip IC Circuit CT",
-                filter: "xray-industrial"
-            },
-            {
-                url: "https://images.unsplash.com/photo-1507668077129-56e32842fceb?q=80&w=1000&auto=format&fit=crop",
-                title: "Mechanical Turbine Alloy",
-                filter: "xray-industrial"
-            }
-        ];
-
-        let currentIndex = 0;
-
-        function cycleAsset(direction) {
-            currentIndex = (currentIndex + xrayLibrary.length + direction) % xrayLibrary.length;
-            const item = xrayLibrary[currentIndex];
-            xrayAsset.src = item.url;
-            xrayAsset.className = `absolute inset-0 w-full h-full object-cover ${item.filter} pointer-events-none transition-all duration-300`;
-            aiLabel.textContent = `M-Scan: ${item.title}`;
-            assetCounter.textContent = `RADIOGRAPH ${currentIndex + 1} / ${xrayLibrary.length}`;
-        }
-
-        function setMode(mode) {
-            ['bone', 'industrial', 'thermal'].forEach(m => {
-                const btn = document.getElementById(`chip-${m}`);
-                if(m === mode) {
-                    btn.className = "px-4 py-1.5 text-xs font-medium rounded-full transition-all bg-blue-600 text-white shadow";
-                } else {
-                    btn.className = "px-4 py-1.5 text-xs font-medium rounded-full transition-all text-slate-300 hover:text-white";
-                }
-            });
-            if(mode === 'bone') xrayAsset.className = "absolute inset-0 w-full h-full object-cover xray-bone pointer-events-none transition-all duration-300";
-            if(mode === 'industrial') xrayAsset.className = "absolute inset-0 w-full h-full object-cover xray-industrial pointer-events-none transition-all duration-300";
-            if(mode === 'thermal') xrayAsset.className = "absolute inset-0 w-full h-full object-cover xray-thermal pointer-events-none transition-all duration-300";
-        }
+        let currentStream = null;
 
         async function startCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
-                video.srcObject = stream;
+                const constraints = {
+                    video: { facingMode: { ideal: "environment" } },
+                    audio: false
+                };
+                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = currentStream;
+                lensVideo.srcObject = currentStream;
                 permissionScreen.style.display = 'none';
+
+                // Sync video dimensions for correct lens alignment
+                video.onloadedmetadata = () => {
+                    lensVideo.width = video.videoWidth;
+                    lensVideo.height = video.videoHeight;
+                };
             } catch (err) {
-                alert("Camera permission is required to run optical tracking.");
+                alert("Camera permission denied or unavailable. Please check device security settings.");
             }
         }
 
         startBtn.addEventListener('click', startCamera);
 
-        // Touch & Mouse Drag Controller for Lens
+        function setMode(mode, btnElement) {
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.className = "mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all text-slate-300 hover:text-white";
+            });
+            btnElement.className = "mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all bg-blue-600 text-white shadow";
+
+            if (mode === 'xray') {
+                lensVideo.className = "absolute object-cover xray-shader pointer-events-none";
+                aiLabel.textContent = "AI Scan: Medical Skeletal Profile";
+            } else if (mode === 'thermal') {
+                lensVideo.className = "absolute object-cover thermal-shader pointer-events-none";
+                aiLabel.textContent = "AI Scan: Thermal Spectrum CT";
+            } else if (mode === 'industrial') {
+                lensVideo.className = "absolute object-cover industrial-shader pointer-events-none";
+                aiLabel.textContent = "AI Scan: Industrial Alloy Matrix";
+            }
+        }
+
+        // Draggable lens logic with real-time video offset alignment
         let isDragging = false;
         let startX, startY;
 
@@ -214,6 +189,16 @@
 
             lens.style.left = newX + 'px';
             lens.style.top = newY + 'px';
+
+            // Keep the inner video perfectly synced with the outer lens position
+            lensVideo.style.left = -newX + 'px';
+            lensVideo.style.top = -newY + 'px';
+            lensVideo.style.width = container.offsetWidth + 'px';
+            lensVideo.style.height = container.offsetHeight + 'px';
+
+            // Dynamic heuristic variation to simulate AI telemetry matching position
+            const randomDensity = (2.1 + (newX % 15) * 0.05).toFixed(2);
+            aiSubtext.textContent = `Spectral Density: ${randomDensity} g/cm³ • Target Locked`;
         }
 
         function dragEnd() {
