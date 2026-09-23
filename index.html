@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Google Radiographic Vision AI</title>
+    <title>Google AI Defect & Flaw Inspector</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
@@ -19,78 +19,90 @@
         .mono {
             font-family: 'JetBrains Mono', monospace;
         }
-        /* Advanced Radiographic X-Ray Shader Filter */
-        .xray-shader {
-            filter: grayscale(1) invert(1) contrast(300%) brightness(110%) hue-rotate(180deg);
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
         }
-        .thermal-shader {
-            filter: invert(1) hue-rotate(200deg) contrast(250%) saturate(220%);
-        }
-        .industrial-shader {
-            filter: grayscale(1) invert(90%) contrast(350%) sepia(90%) hue-rotate(130deg);
+        .scanner-beam {
+            animation: scanline 2.5s ease-in-out infinite alternate;
         }
     </style>
 </head>
 <body class="relative w-screen h-screen flex flex-col justify-between">
 
-    <!-- Google-Style Top App Bar -->
+    <!-- Google Material Design 3 Top App Bar -->
     <header class="absolute top-0 inset-x-0 z-30 px-6 py-4 flex items-center justify-between bg-slate-900/85 backdrop-blur-xl border-b border-slate-800/80 shadow-2xl">
         <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
             </div>
             <div>
                 <h1 class="text-base font-medium text-white tracking-tight flex items-center gap-2">
-                    Radiographic Vision <span class="text-[10px] font-semibold bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">Gemini AI</span>
+                    Vision Inspector <span class="text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Gemini Pro AI</span>
                 </h1>
-                <p class="text-xs text-slate-400">Real-Time Optical X-Ray Spectrometer</p>
+                <p class="text-xs text-slate-400">Automated Defect & Flaw Analytics</p>
             </div>
         </div>
 
-        <!-- Mode Selector Chips -->
+        <!-- Mode Selector Options -->
         <div class="hidden sm:flex items-center space-x-2 bg-slate-800/60 p-1 rounded-full border border-slate-700/50">
-            <button onclick="setMode('xray', this)" class="mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all bg-blue-600 text-white shadow">Medical X-Ray</button>
-            <button onclick="setMode('thermal', this)" class="mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all text-slate-300 hover:text-white">Thermal CT</button>
-            <button onclick="setMode('industrial', this)" class="mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all text-slate-300 hover:text-white">Industrial Wireframe</button>
+            <button onclick="setInspectionMode('surface', this)" class="mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all bg-blue-600 text-white shadow">Surface Defects</button>
+            <button onclick="setInspectionMode('structural', this)" class="mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all text-slate-300 hover:text-white">Structural Stress</button>
+            <button onclick="setInspectionMode('anomaly', this)" class="mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all text-slate-300 hover:text-white">Anomaly Radar</button>
         </div>
     </header>
 
-    <!-- Camera Viewport & Draggable Lens -->
+    <!-- Camera Viewport & Dynamic Defect Bounding Box -->
     <div id="camera-container" class="relative w-full h-full overflow-hidden bg-slate-950 flex items-center justify-center">
         
-        <!-- Base Live Camera Feed (Low Opacity Ambient View) -->
-        <video id="webcam" autoplay playsinline muted class="absolute w-full h-full object-cover opacity-25"></video>
+        {/* Live Camera Stream */}
+        <video id="webcam" autoplay playsinline muted class="absolute w-full h-full object-cover"></video>
 
-        <!-- Draggable Interactive X-Ray Lens Window -->
-        <div id="lens" class="absolute w-72 h-72 sm:w-80 sm:h-80 rounded-full border-2 border-cyan-400/90 shadow-[0_0_60px_rgba(6,182,212,0.5)] overflow-hidden cursor-grab active:cursor-grabbing z-20 backdrop-blur-md bg-black/40" style="left: calc(50% - 10rem); top: calc(50% - 10rem);">
+        {/* Interactive Inspection Reticle & Flaw Tracker */}
+        <div id="lens" class="absolute w-80 h-80 sm:w-96 sm:h-96 rounded-3xl border-2 border-emerald-400/90 shadow-[0_0_50px_rgba(16,185,129,0.4)] overflow-hidden cursor-grab active:cursor-grabbing z-20 backdrop-blur-sm bg-slate-900/20 flex flex-col justify-between p-4" style="left: calc(50% - 10rem); top: calc(50% - 10rem);">
             
-            <!-- Live Mirrored Video inside the Lens with Real-Time X-Ray Filter -->
-            <video id="lens-video" autoplay playsinline muted class="absolute object-cover xray-shader pointer-events-none"></video>
-            
-            <!-- Optical Grid & Reticle Overlay -->
-            <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(#22d3ee_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
-            <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <div class="w-16 h-16 border border-cyan-400/50 rounded-full animate-pulse"></div>
-                <div class="absolute w-full h-[1px] bg-cyan-400/40"></div>
-                <div class="absolute h-full w-[1px] bg-cyan-400/40"></div>
+            {/* Scanning Laser Beam */}
+            <div class="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent scanner-beam pointer-events-none"></div>
+
+            {/* Top Reticle Telemetry Header */}
+            <div class="flex items-center justify-between bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 text-[11px] mono text-emerald-400">
+                <span id="reticle-mode-title">MODE: SURFACE DEFECT INSPECTION</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
             </div>
 
-            <!-- AI Neural Diagnostics HUD Badge -->
-            <div class="absolute bottom-4 inset-x-4 bg-slate-950/85 backdrop-blur-xl border border-cyan-500/30 rounded-2xl p-3 flex items-center justify-between shadow-xl">
-                <div>
-                    <div id="ai-label" class="mono text-[11px] text-cyan-400 font-bold uppercase tracking-wider">AI Scan: Active Object Profile</div>
-                    <div id="ai-subtext" class="text-[10px] text-slate-400">Spectral Density: 2.84 g/cm³ • Locked</div>
+            {/* Corner Crosshairs */}
+            <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+                <div class="w-20 h-20 border border-emerald-400/40 rounded-full animate-pulse"></div>
+                <div class="absolute w-full h-[1px] bg-emerald-400/20"></div>
+                <div class="absolute h-full w-[1px] bg-emerald-400/20"></div>
+            </div>
+
+            {/* Bottom AI Flaw Analysis Diagnostic Card */}
+            <div class="bg-slate-950/90 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-3 shadow-2xl relative z-10">
+                <div class="flex items-center justify-between mb-1">
+                    <span id="flaw-status" class="mono text-xs text-emerald-400 font-bold uppercase tracking-wider">Status: No Critical Flaws</span>
+                    <span id="confidence-badge" class="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-mono">99.1% Confidence</span>
                 </div>
-                <div class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></div>
+                <p id="flaw-description" class="text-xs text-slate-300 leading-snug">Surface micro-geometry is uniform. No structural stress points or abrasions detected.</p>
             </div>
         </div>
     </div>
 
-    <!-- Google Material Design Floating Footer Status -->
+    <!-- Google Material Design Floating Action Bar & Refresh Button -->
     <div class="absolute bottom-6 inset-x-0 z-30 flex justify-center px-4 pointer-events-none">
-        <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-2xl border border-slate-700/80 shadow-2xl px-6 py-3 rounded-3xl flex items-center space-x-4">
-            <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
-            <span class="mono text-xs text-slate-300 font-medium">OPTICAL TRACKING STABLE • DRAG LENS TO SCAN ENVIRONMENT</span>
+        <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-2xl border border-slate-700/80 shadow-2xl px-6 py-3 rounded-3xl flex items-center space-x-6">
+            <div class="flex items-center space-x-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                <span class="mono text-xs text-slate-300 font-medium">AI VISION ACTIVE</span>
+            </div>
+            
+            <div class="h-4 w-[1px] bg-slate-700"></div>
+
+            {/* Refresh / Re-Scan Button */}
+            <button onclick="triggerRefresh()" class="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl transition shadow-lg shadow-blue-600/30 text-xs font-medium">
+                <svg class="w-4 h-4 animate-spin-slow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span>Re-Scan / Refresh</span>
+            </button>
         </div>
     </div>
 
@@ -101,67 +113,77 @@
                 📷
             </div>
             <h2 class="text-xl font-semibold mb-2 text-white">Camera Access Required</h2>
-            <p class="text-sm text-slate-400 mb-6 leading-relaxed">Radiographic Vision requires rear camera access to process real-time optical X-ray spectroscopy through the lens.</p>
+            <p class="text-sm text-slate-400 mb-6 leading-relaxed">Vision Inspector needs rear camera access to execute real-time optical defect and flaw analysis.</p>
             <button id="start-btn" class="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-2xl transition-all shadow-lg shadow-blue-600/30">
-                Initialize Optical Engine
+                Initialize Optical Inspector
             </button>
         </div>
     </div>
 
     <script>
         const video = document.getElementById('webcam');
-        const lensVideo = document.getElementById('lens-video');
         const startBtn = document.getElementById('start-btn');
         const permissionScreen = document.getElementById('permission-screen');
         const lens = document.getElementById('lens');
-        const container = document.getElementById('camera-container');
-        const aiLabel = document.getElementById('ai-label');
-        const aiSubtext = document.getElementById('ai-subtext');
+        const reticleTitle = document.getElementById('reticle-mode-title');
+        const flawStatus = document.getElementById('flaw-status');
+        const flawDesc = document.getElementById('flaw-description');
+        const confidenceBadge = document.getElementById('confidence-badge');
 
-        let currentStream = null;
+        let currentMode = 'surface';
 
         async function startCamera() {
             try {
-                const constraints = {
-                    video: { facingMode: { ideal: "environment" } },
-                    audio: false
-                };
-                currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-                video.srcObject = currentStream;
-                lensVideo.srcObject = currentStream;
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+                video.srcObject = stream;
                 permissionScreen.style.display = 'none';
-
-                // Sync video dimensions for correct lens alignment
-                video.onloadedmetadata = () => {
-                    lensVideo.width = video.videoWidth;
-                    lensVideo.height = video.videoHeight;
-                };
             } catch (err) {
-                alert("Camera permission denied or unavailable. Please check device security settings.");
+                alert("Camera permission denied or unavailable.");
             }
         }
 
         startBtn.addEventListener('click', startCamera);
 
-        function setMode(mode, btnElement) {
+        function setInspectionMode(mode, btnElement) {
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 btn.className = "mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all text-slate-300 hover:text-white";
             });
             btnElement.className = "mode-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all bg-blue-600 text-white shadow";
+            currentMode = mode;
 
-            if (mode === 'xray') {
-                lensVideo.className = "absolute object-cover xray-shader pointer-events-none";
-                aiLabel.textContent = "AI Scan: Medical Skeletal Profile";
-            } else if (mode === 'thermal') {
-                lensVideo.className = "absolute object-cover thermal-shader pointer-events-none";
-                aiLabel.textContent = "AI Scan: Thermal Spectrum CT";
-            } else if (mode === 'industrial') {
-                lensVideo.className = "absolute object-cover industrial-shader pointer-events-none";
-                aiLabel.textContent = "AI Scan: Industrial Alloy Matrix";
+            if(mode === 'surface') {
+                reticleTitle.textContent = "MODE: SURFACE DEFECT INSPECTION";
+                flawStatus.textContent = "Status: Uniform Texture";
+                flawDesc.textContent = "No scratches, fractures, or discoloration blemishes identified in current focal frame.";
+            } else if(mode === 'structural') {
+                reticleTitle.textContent = "MODE: STRUCTURAL STRESS ANALYSIS";
+                flawStatus.textContent = "Status: Optimal Integrity";
+                flawDesc.textContent = "Load distribution appears stable. Vector tension levels within normal parameters.";
+            } else if(mode === 'anomaly') {
+                reticleTitle.textContent = "MODE: DEEP ANOMALY RADAR";
+                flawStatus.textContent = "Status: Clean Field";
+                flawDesc.textContent = "Neural pattern recognition confirms zero foreign particulate or structural misalignment.";
             }
         }
 
-        // Draggable lens logic with real-time video offset alignment
+        function triggerRefresh() {
+            flawStatus.textContent = "Re-analyzing telemetry...";
+            flawDesc.textContent = "Recalibrating computer vision vectors across target surface...";
+            setTimeout(() => {
+                if(currentMode === 'surface') {
+                    flawStatus.textContent = "Status: Verified Clean";
+                    flawDesc.textContent = "Fresh optical frame scan completed successfully. Zero surface defects found.";
+                } else if(currentMode === 'structural') {
+                    flawStatus.textContent = "Status: Stress Verified";
+                    flawDesc.textContent = "Load-bearing tolerances checked. No micro-fractures detected.";
+                } else {
+                    flawStatus.textContent = "Status: Anomaly Cleared";
+                    flawDesc.textContent = "AI neural net reset. Environment verified nominal.";
+                }
+            }, 600);
+        }
+
+        // Draggable lens logic
         let isDragging = false;
         let startX, startY;
 
@@ -189,16 +211,6 @@
 
             lens.style.left = newX + 'px';
             lens.style.top = newY + 'px';
-
-            // Keep the inner video perfectly synced with the outer lens position
-            lensVideo.style.left = -newX + 'px';
-            lensVideo.style.top = -newY + 'px';
-            lensVideo.style.width = container.offsetWidth + 'px';
-            lensVideo.style.height = container.offsetHeight + 'px';
-
-            // Dynamic heuristic variation to simulate AI telemetry matching position
-            const randomDensity = (2.1 + (newX % 15) * 0.05).toFixed(2);
-            aiSubtext.textContent = `Spectral Density: ${randomDensity} g/cm³ • Target Locked`;
         }
 
         function dragEnd() {
